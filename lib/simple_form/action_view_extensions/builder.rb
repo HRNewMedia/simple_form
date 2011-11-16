@@ -181,6 +181,8 @@ class ActionView::Helpers::FormBuilder
   #
   alias :original_collection_select :collection_select
   def collection_select(attribute, collection, value_method, text_method, options={}, html_options={})
+    prepend = "".html_safe
+
     if value_method.respond_to?(:call) || text_method.respond_to?(:call)
       collection = collection.map do |item|
         value = value_for_collection(item, value_method)
@@ -200,6 +202,11 @@ class ActionView::Helpers::FormBuilder
       value_method, text_method = :first, :last
     end
 
-    original_collection_select(attribute, collection, value_method, text_method, options, html_options)
+    if html_options[:multiple]
+      prepend << hidden_field(attribute, value: nil, id: nil, multiple: true)
+    end
+
+    prepend +
+      original_collection_select(attribute, collection, value_method, text_method, options, html_options)
   end
 end
